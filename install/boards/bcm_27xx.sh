@@ -6,8 +6,16 @@ VERSION="${VERSION:-master}"
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-bluerobotics/blueos-docker}
 REMOTE="${REMOTE:-https://raw.githubusercontent.com/${GITHUB_REPOSITORY}}"
 ROOT="$REMOTE/$VERSION"
-CMDLINE_FILE=/boot/cmdline.txt
-CONFIG_FILE=/boot/config.txt
+
+. /etc/os-release
+echo $VERSION_ID
+if [[ "$VERSION_ID" == "12" ]]; then
+    CMDLINE_FILE=/boot/firmware/cmdline.txt
+    CONFIG_FILE=/boot/firmware/config.txt
+else
+    CMDLINE_FILE=/boot/cmdline.txt
+    CONFIG_FILE=/boot/config.txt
+fi
 alias curl="curl --retry 6 --max-time 15 --retry-all-errors"
 
 # Download, compile, and install spi0 mosi-only device tree overlay for
@@ -42,7 +50,6 @@ fi
 line_number=$(grep -n "\[pi4\]" $CONFIG_FILE | awk -F ":" '{print $1}')
 echo "Line number of [pi4] tag: $line_number"
 
-
 for STRING in \
     "enable_uart=1" \
     "dtoverlay=uart1" \
@@ -60,6 +67,11 @@ for STRING in \
     "gpio=11,24,25=op,pu,dh" \
     "gpio=37=op,pd,dl" \
     "dtoverlay=dwc2,dr_mode=otg" \
+    "dtparam=krnbt=off" \
+    "" \
+    "gpu_mem=256" \
+    "dtoverlay=vc4-fkms-v3d" \
+    "max_framebuffers=2" \
     ; do \
     sed -i "$line_number r /dev/stdin" $CONFIG_FILE <<< "$STRING"
 done
