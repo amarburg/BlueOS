@@ -53,6 +53,7 @@ echo "Line number of [pi4] tag: $line_number"
 for STRING in \
     "enable_uart=1" \
     "dtoverlay=uart1" \
+    "dtoverlay=uart2" \
     "dtoverlay=uart3" \
     "dtoverlay=uart4" \
     "dtoverlay=uart5" \
